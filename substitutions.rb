@@ -1,4 +1,9 @@
-substitutions = {
+# https://xkcd.com/1288/
+# https://xkcd.com/1625/
+# https://xkcd.com/1679/
+
+
+@substitutions = {
 "Witnesses"=>"These dudes I know",
 "Allegedly"=>"Kinda probably",
 "New study"=>"Tumblr post",
@@ -54,3 +59,12 @@ substitutions = {
 "Scientists"=>"Channing Tatum and his friends",
 "You won't believe"=>"I'm really sad about "
 }
+
+def fix s
+    return nil,0 unless s
+    count = 0
+    @substitutions.each do |k,v|
+        count += 1 if s.gsub!(/#{k}/i,v)
+    end
+    return s,count
+end

@@ -1,6 +1,7 @@
 require 'net/http'
 require 'nokogiri'
 require 'json'
+require './substitutions.rb'
 
 host = 'www.nhs.uk'
 
@@ -8,7 +9,7 @@ puts "Gathering index urls..."
 source = Net::HTTP.get(host , '/Conditions/Pages/hub.aspx')
 html = Nokogiri::HTML(source)
 urls = html.xpath('//*[@id="haz-mod1"]/ul/li/a/@href').map {|l| "/Conditions/Pages/#{l}"}
-urls = [urls.first]
+#urls = [urls.first]
 
 articles=[]
 
@@ -36,13 +37,16 @@ end
 
 #articles = [articles.first]
 puts "Collecting content..."
-
+total =0
 articles.each do |a|
+    sleep 1
     puts "Gathering content from #{a[:article_url]}/Pages/Introduction.aspx"
-    html = Nokogiri::HTML(Net::HTTP.get(host ,"#{a[:article_url]}/Pages/Introduction.aspx"))
-    a[:content] = html.xpath("//*[@id='aspnetForm']/div[4]/div[4]/div[1]/div[1]").inner_html.strip!
+    a[:content],count =fix html.xpath("//*//*[@id='aspnetForm']").inner_html.strip!
+    total +=count
+    puts "fixed #{count}" if count>0
 end
 
+puts "Generating json..."
 File.open('content.json','w') do |f|
     f.write(JSON.pretty_generate(articles))
 end
